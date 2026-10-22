@@ -1,0 +1,800 @@
+metadata:
+  name: Patterns
+  description: >
+    Crafting patterns for weapons, tools, armor and gear in a 2D side-view
+    tile world. A pattern is a blueprint: it lists slots, each pointing at a
+    part type.
+  version: 4
+  view: side_view_2d
+  tile_grid: true
+
+# ---------------------------------------------------------------------------
+# How a material's stats combine, by part role.
+# ---------------------------------------------------------------------------
+stat_rules:
+  head:
+    mode: additive
+    fields: [damage, resistance, speed]
+    aggregate: mean
+  guard:
+    mode: additive
+    fields: [defense]
+    aggregate: sum
+    bonus: { resistance: 1 }
+  binding:
+    mode: trait_only
+  cord:
+    mode: trait_only
+  handle:
+    mode: multiplier
+    fields: [speed, resistance]
+    divisor: 20
+  tip:
+    mode: additive
+    fields: [damage, resistance, speed, defense]
+    aggregate: sum
+    scale: 0.5
+  coating:
+    mode: additive
+    fields: [damage, resistance, speed, defense]
+    aggregate: sum
+    scale: 0.25
+
+  # --- armor roles ---------------------------------------------------------
+  armor_plate:
+    mode: additive
+    fields: [defense, resistance]
+    aggregate: sum
+  armor_lining:
+    mode: additive
+    fields: [speed]
+    aggregate: sum
+  armor_fastener:
+    mode: trait_only
+
+# ---------------------------------------------------------------------------
+# 2D geometry vocabulary (documentation for pattern attack/mining blocks).
+# ---------------------------------------------------------------------------
+geometry:
+  box_aim: [facing, up, down, all]
+  speed_classes:
+    fast: 0.5
+    normal: 0.75
+    slow: 1.1
+    very_slow: 1.6
+  projectile_paths: [straight, arc, gravity]
+
+# ---------------------------------------------------------------------------
+# Part types. Patterns reference these by id.
+# ---------------------------------------------------------------------------
+part_types:
+
+  # --- weapon / tool heads ------------------------------------------------
+  sword_blade:       { name: Sword Blade,         role: head, accepted_tags: [metal, gem, stone, bone, flint] }
+  large_sword_blade: { name: Large Sword Blade,   role: head, accepted_tags: [metal, gem, stone] }
+  knife_blade:       { name: Knife Blade,         role: head, accepted_tags: [metal, gem, stone, bone, flint] }
+  scythe_head:       { name: Scythe Head,         role: head, accepted_tags: [metal, gem, stone] }
+  claw_head:         { name: Claw Head,           role: head, accepted_tags: [metal, gem, bone, flint] }
+  spear_head:        { name: Spear Head,          role: head, accepted_tags: [metal, gem, stone, bone, flint] }
+  halberd_head:      { name: Halberd Head,        role: head, accepted_tags: [metal, gem, stone] }
+  axe_head:          { name: Axe Head,            role: head, accepted_tags: [metal, gem, stone] }
+  broad_axe_head:    { name: Broad Axe Head,      role: head, accepted_tags: [metal, gem, stone] }
+  pickaxe_head:      { name: Pickaxe Head,        role: head, accepted_tags: [metal, gem, stone] }
+  shovel_head:       { name: Shovel Head,         role: head, accepted_tags: [metal, gem, stone, bone] }
+  hoe_head:          { name: Hoe Head,            role: head, accepted_tags: [metal, gem, stone] }
+  mattock_head:      { name: Mattock Head,        role: head, accepted_tags: [metal, gem, stone] }
+  hammer_head:       { name: Hammer Head,         role: head, accepted_tags: [metal, gem, stone] }
+  mace_head:         { name: Mace Head,           role: head, accepted_tags: [metal, stone] }
+  excavator_head:    { name: Excavator Head,      role: head, accepted_tags: [metal, gem, stone] }
+  scissors_blade:    { name: Scissors Blade,      role: head, accepted_tags: [metal, gem, bone] }
+  shears_blade:      { name: Shears Blade,        role: head, accepted_tags: [metal, gem, stone] }
+  kunai_blade:      { name: Kunai Blade,        role: head,    accepted_tags: [metal, gem, stone, bone, flint] }
+  shuriken_blade:   { name: Shuriken Star,      role: head,    accepted_tags: [metal] }
+  needle_point:     { name: Needle Point,       role: head,    accepted_tags: [metal, gem, bone] }
+  wrench_head:      { name: Wrench Head,        role: head,    accepted_tags: [metal] }
+  kunai_ring:       { name: Kunai Ring,         role: binding, accepted_tags: [metal, fiber] }
+
+  # --- ranged heads --------------------------------------------------------
+  bow_limb:          { name: Bow Limb,            role: head, accepted_tags: [wood, metal, bone] }
+  crossbow_limb:     { name: Crossbow Limb,       role: head, accepted_tags: [wood, metal, bone] }
+
+  # --- weapon guards -------------------------------------------------------
+  wide_guard:        { name: Wide Guard,          role: guard, accepted_tags: [metal, gem, stone] }
+  hand_guard:        { name: Hand Guard,          role: guard, accepted_tags: [metal, gem, stone] }
+  crossbar:          { name: Crossbar,            role: guard, accepted_tags: [metal, gem, stone, wood] }
+
+  # --- bindings ------------------------------------------------------------
+  binding:           { name: Binding,             role: binding, accepted_tags: [fiber, leather, hide] }
+  tough_binding:     { name: Tough Binding,       role: binding, accepted_tags: [metal, gem, stone] }
+
+  # --- handles -------------------------------------------------------------
+  tool_rod:          { name: Tool Rod,            role: handle, accepted_tags: [wood, metal, bone] }
+  tough_rod:         { name: Tough Rod,           role: handle, accepted_tags: [metal, gem, bone] }
+
+  # --- cords ---------------------------------------------------------------
+  bowstring:         { name: Bowstring,           role: cord, accepted_tags: [fiber] }
+
+  # --- armor parts ---------------------------------------------------------
+  helmet_plate:      { name: Helmet Plate,        role: armor_plate, accepted_tags: [metal, gem, stone, bone, leather] }
+  chest_plate:       { name: Chest Plate,         role: armor_plate, accepted_tags: [metal, gem, stone, bone, leather] }
+  leg_plate:         { name: Leg Plate,           role: armor_plate, accepted_tags: [metal, gem, stone, bone, leather] }
+  boot_plate:        { name: Boot Plate,          role: armor_plate, accepted_tags: [metal, gem, stone, bone, leather] }
+  shield_plate:      { name: Shield Plate,        role: armor_plate, accepted_tags: [wood, metal, leather, hide] }
+  armor_lining:      { name: Armor Lining,        role: armor_lining, accepted_tags: [leather, padding, fiber] }
+  armor_fastener:    { name: Armor Fastener,      role: armor_fastener, accepted_tags: [metal, leather, fiber] }
+
+# ---------------------------------------------------------------------------
+# Patterns.
+# ---------------------------------------------------------------------------
+patterns:
+
+  # ============================================================ WEAPONS
+  short_sword:
+    name: Short Sword
+    category: weapon
+    description: A fast one-handed blade with a quick 1-tile swing.
+    parts:
+      - { slot: head,   part_type: sword_blade, role: head,   required: true }
+      - { slot: guard,  part_type: wide_guard,  role: guard,  required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle, required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+    innate_traits:
+      - { name: Balanced, description: No penalties. }
+
+  long_sword:
+    name: Long Sword
+    category: weapon
+    description: A two-handed blade with a 2-tile horizontal sweep.
+    parts:
+      - { slot: head,   part_type: sword_blade, role: head,   required: true }
+      - { slot: guard,  part_type: hand_guard,  role: guard,  required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle, required: true }
+    attack:
+      shape: box
+      width: 2
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: multi
+    innate_traits:
+      - { name: Sweeping Cut, description: Hits up to 2 enemies side by side. }
+
+  dagger:
+    name: Dagger
+    category: weapon
+    description: A tiny blade built for speed and stealth. Cannot block.
+    parts:
+      - { slot: head,   part_type: knife_blade, role: head,   required: true }
+      - { slot: guard,  part_type: crossbar,    role: guard,  required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle, required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+    innate_traits:
+      - { name: Backstab, description: Deals triple damage when attacking from behind. }
+
+    # ======================================================== THROWING
+  kunai:
+    name: Kunai
+    category: throwing
+    description: A small weighted dagger with a ring pommel. Balanced to be thrown, but perfectly usable in melee.
+    parts:
+      - { slot: blade,  part_type: kunai_blade, role: head,    required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle,  required: true }
+      - { slot: ring,   part_type: kunai_ring,  role: binding, required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+    projectile:
+      path: straight
+      speed: 20
+      pierce: 0
+      ammo: self
+      recoverable: true
+    innate_traits:
+      - { name: Weighted Throw, description: Can be thrown in a straight line and picked back up. Usable in melee at full damage. }
+
+  shuriken:
+    name: Shuriken
+    category: throwing
+    description: A four-pointed throwing star. Fast, cheap, and always thrown in threes - a barrage weapon, not a duelist's tool.
+    parts:
+      - { slot: star, part_type: shuriken_blade, role: head, required: true }
+    projectile:
+      path: straight
+      speed: 24
+      pierce: 1
+      ammo: self
+      recoverable: true
+      barrage: 3
+    innate_traits:
+      - { name: Barrage, description: Thrown in threes. Each hit rolls damage separately. No melee attack. }
+
+  needle:
+    name: Needle (Senbon)
+    category: throwing
+    description: A slim surgical needle. Almost no damage - but silent, fast, and perfect for delivering poison.
+    parts:
+      - { slot: point, part_type: needle_point, role: head, required: true }
+    attack:
+      shape: line
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+      damage_mult: 0.3
+    projectile:
+      path: straight
+      speed: 28
+      pierce: 2
+      ammo: self
+      recoverable: true
+    innate_traits:
+      - { name: Precision, description: Applies poisons and coatings at double duration. Deals almost no damage on its own. }
+
+  javelin:
+    name: Javelin
+    category: throwing
+    description: A short, light spear balanced for throwing. Heavy impact on a clean hit - but you only get one throw before you have to pick it back up.
+    parts:
+      - { slot: head,   part_type: spear_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,   role: handle, required: true }
+    attack:
+      shape: line
+      width: 2
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+    projectile:
+      path: arc
+      speed: 16
+      pierce: 1
+      ammo: self
+      recoverable: true
+    innate_traits:
+      - { name: Heavy Throw, description: Arced throw, deals 2× damage on a clean hit. Cannot be thrown at short range. }
+
+  # ======================================================== SPEAR VARIANT
+  pike:
+    name: Pike
+    category: weapon
+    description: A very long spear - four tiles of reach. Devastating in formation, clumsy in a corridor.
+    parts:
+      - { slot: head,   part_type: spear_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,   role: handle, count: 3, required: true }
+    attack:
+      shape: line
+      width: 4
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: slow
+      hits: single
+    innate_traits:
+      - { name: Formation, description: +50% damage when an ally wielding a polearm is adjacent to you. -30% attack speed. }
+
+  # ======================================================== TOOL
+  wrench:
+    name: Wrench
+    category: tool
+    description: An adjustable spanner. Repairs damaged tools and weapons, and salvages finished items back into parts. A blunt instrument if you swing it.
+    parts:
+      - { slot: head,   part_type: wrench_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle, required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+      damage_mult: 0.6
+    innate_traits:
+      - { name: Repair, description: Right-click a damaged item in your inventory to spend 10 durability restoring 25% of its max. Cannot repair itself. }
+      - { name: Salvage, description: Breaks a finished item back into its component parts at 50% durability each. }
+
+  scythe:
+    name: Scythe
+    category: weapon
+    description: A 3-tile-wide horizontal sweep. Slow, but clears a room.
+    parts:
+      - { slot: head,    part_type: scythe_head,   role: head,    required: true }
+      - { slot: binding, part_type: tough_binding, role: binding, required: true }
+      - { slot: handle,  part_type: tough_rod,     role: handle,  count: 2, required: true }
+    attack:
+      shape: box
+      width: 3
+      height: 2
+      reach: 1
+      aim: [facing]
+      speed: slow
+      hits: multi
+    innate_traits:
+      - { name: Reaper, description: Hits every enemy in a 3x2 box in front of you. }
+
+  claws:
+    name: Claws
+    category: weapon
+    description: Curved blades on the hand. Very fast, 1-tile reach.
+    parts:
+      - { slot: head,    part_type: claw_head, role: head,    required: true }
+      - { slot: binding, part_type: binding,   role: binding, required: true }
+      - { slot: handle,  part_type: tool_rod,  role: handle,  required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+    innate_traits:
+      - { name: Rend, description: Consecutive hits on the same target add +10% damage, up to +50%. }
+
+  rapier:
+    name: Rapier
+    category: weapon
+    description: A 2-tile line thrust that ignores armour.
+    parts:
+      - { slot: head,   part_type: sword_blade, role: head,   required: true }
+      - { slot: guard,  part_type: crossbar,    role: guard,  required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle, required: true }
+    attack:
+      shape: line
+      width: 2
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+    innate_traits:
+      - { name: Armour Piercing, description: Ignores 50% of target armour. -15% durability. }
+
+  broadsword:
+    name: Broadsword
+    category: weapon
+    description: A massive 2x2 sweeping blade.
+    parts:
+      - { slot: head,   part_type: large_sword_blade, role: head,   required: true }
+      - { slot: guard,  part_type: wide_guard,        role: guard,  required: true }
+      - { slot: handle, part_type: tool_rod,          role: handle, required: true }
+    attack:
+      shape: box
+      width: 2
+      height: 2
+      reach: 1
+      aim: [facing]
+      speed: slow
+      hits: multi
+    innate_traits:
+      - { name: Cleave, description: Hits every enemy in a 2x2 box. +20% stagger. }
+
+  katana:
+    name: Katana
+    category: weapon
+    description: A single-edged curved blade. Fast 2-tile horizontal cut.
+    parts:
+      - { slot: head,   part_type: large_sword_blade, role: head,   required: true }
+      - { slot: guard,  part_type: hand_guard,        role: guard,  required: true }
+      - { slot: handle, part_type: tough_rod,         role: handle, required: true }
+    attack:
+      shape: box
+      width: 2
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+    innate_traits:
+      - { name: Iaijutsu, description: The first hit after drawing deals +40% damage. }
+
+  spear:
+    name: Spear
+    category: weapon
+    description: A 3-tile line thrust - the longest melee reach in the game.
+    parts:
+      - { slot: head,   part_type: spear_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,   role: handle, count: 2, required: true }
+    attack:
+      shape: line
+      width: 3
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+    innate_traits:
+      - { name: Long Reach, description: Hits a 3-tile line. }
+
+  halberd:
+    name: Halberd
+    category: weapon
+    description: A 2-tile line attack that can hook and drag a target.
+    parts:
+      - { slot: head,    part_type: halberd_head,  role: head,    required: true }
+      - { slot: binding, part_type: tough_binding, role: binding, required: true }
+      - { slot: handle,  part_type: tough_rod,     role: handle,  count: 2, required: true }
+    attack:
+      shape: line
+      width: 2
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+    innate_traits:
+      - { name: Hook, description: Pulls the target 1 tile closer on hit. }
+
+  battleaxe:
+    name: Battleaxe
+    category: weapon
+    description: A 2-tall vertical chop. Breaks shields and fells trees.
+    parts:
+      - { slot: head,    part_type: broad_axe_head, role: head,    required: true }
+      - { slot: binding, part_type: tough_binding,  role: binding, required: true }
+      - { slot: handle,  part_type: tough_rod,      role: handle,  required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 2
+      reach: 1
+      aim: [facing]
+      speed: slow
+      hits: single
+    innate_traits:
+      - { name: Shield Breaker, description: Triple damage to shields. +25% damage to wood. }
+
+  warhammer:
+    name: Warhammer
+    category: weapon
+    description: A slow 2-tall crushing maul.
+    parts:
+      - { slot: head,    part_type: hammer_head,   role: head,    required: true }
+      - { slot: binding, part_type: tough_binding, role: binding, required: true }
+      - { slot: handle,  part_type: tough_rod,     role: handle,  count: 2, required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 2
+      reach: 1
+      aim: [facing]
+      speed: very_slow
+      hits: single
+    innate_traits:
+      - { name: Crushing Blow, description: Ignores 30% of armour. Staggers. }
+
+  mace:
+    name: Mace
+    category: weapon
+    description: A weighted 1-tile blunt weapon.
+    parts:
+      - { slot: head,   part_type: mace_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,  role: handle, required: true }
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+    innate_traits:
+      - { name: Concussive, description: 20% chance to stun for 1 second. }
+
+  # ============================================================ RANGED
+  bow:
+    name: Bow
+    category: ranged
+    description: Fires arrows on a shallow arc. Two limbs and a string.
+    parts:
+      - { slot: upper_limb, part_type: bow_limb,  role: head, required: true }
+      - { slot: lower_limb, part_type: bow_limb,  role: head, required: true }
+      - { slot: string,     part_type: bowstring, role: cord, required: true }
+    projectile:
+      path: arc
+      speed: 18
+      pierce: 0
+      ammo: arrow
+      draw_time: 0.6
+    innate_traits:
+      - { name: Draw, description: Damage scales with the average damage of both limbs. }
+
+  crossbow:
+    name: Crossbow
+    category: ranged
+    description: Straight-line bolts. Slower to reload than a bow.
+    parts:
+      - { slot: limb,    part_type: crossbow_limb, role: head,    required: true }
+      - { slot: string,  part_type: bowstring,     role: cord,    required: true }
+      - { slot: stock,   part_type: tool_rod,      role: handle,  required: true }
+      - { slot: binding, part_type: binding,       role: binding, required: true }
+    projectile:
+      path: straight
+      speed: 28
+      pierce: 1
+      ammo: bolt
+      reload: 1.0
+    innate_traits:
+      - { name: Held Draw, description: Can be kept loaded indefinitely. +30% bolt damage. }
+
+  # ============================================================= TOOLS
+  pickaxe:
+    name: Pickaxe
+    category: tool
+    description: Mines a single stone or ore tile. Aim up, down, or forward.
+    parts:
+      - { slot: head,    part_type: pickaxe_head, role: head,    required: true }
+      - { slot: binding, part_type: binding,      role: binding, required: true }
+      - { slot: handle,  part_type: tool_rod,     role: handle,  required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing, up, down]
+      targets: [stone, ore, metal_ore, gem_ore]
+      tier_from_head: true
+    innate_traits:
+      - { name: Mining, description: Mining tier equals the head material's tier. }
+
+  axe:
+    name: Axe
+    category: tool
+    description: Chops wood, doubles as a serviceable weapon at -20% damage.
+    parts:
+      - { slot: head,   part_type: axe_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod, role: handle, required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 2
+      reach: 1
+      aim: [facing]
+      targets: [wood, log, leaves]
+    attack:
+      shape: box
+      width: 1
+      height: 2
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+      damage_mult: 0.8
+    innate_traits:
+      - { name: Chopping, description: +200% speed against wood. }
+
+  shovel:
+    name: Shovel
+    category: tool
+    description: Digs soft ground.
+    parts:
+      - { slot: head,   part_type: shovel_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,    role: handle, required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing, up, down]
+      targets: [dirt, grass, sand, gravel, snow, clay]
+    innate_traits:
+      - { name: Digging, description: +200% speed against soft ground. }
+
+  hoe:
+    name: Hoe
+    category: tool
+    description: Tills the tile below the player's feet.
+    parts:
+      - { slot: head,   part_type: hoe_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod, role: handle, required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [down]
+      targets: [dirt, grass]
+      converts_to: farmland
+    innate_traits:
+      - { name: Till, description: Converts dirt and grass into farmland. }
+
+  mattock:
+    name: Mattock
+    category: tool
+    description: Pickaxe and axe in one head. Saves a hotbar slot.
+    parts:
+      - { slot: head,   part_type: mattock_head, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,     role: handle, required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing, up, down]
+      targets: [stone, ore, metal_ore, wood, log]
+      speed_mult: 0.75
+    innate_traits:
+      - { name: Hybrid, description: Mines stone and chops wood at 75% speed. }
+
+  hammer:
+    name: Hammer
+    category: tool
+    description: A heavy 3x2 pickaxe. Mines an area, slowly.
+    parts:
+      - { slot: head,    part_type: hammer_head,   role: head,    required: true }
+      - { slot: binding, part_type: tough_binding, role: binding, required: true }
+      - { slot: handle,  part_type: tough_rod,     role: handle,  count: 2, required: true }
+    mining:
+      shape: box
+      width: 3
+      height: 2
+      reach: 1
+      aim: [facing, up, down]
+      targets: [stone, ore, metal_ore, gem_ore]
+      speed_mult: 0.6
+      tier_from_head: true
+    innate_traits:
+      - { name: Area Mining, description: Mines a 3x2 area. -40% speed. }
+
+  excavator:
+    name: Excavator
+    category: tool
+    description: A wide shovel head that digs a 3x1 strip of soft ground.
+    parts:
+      - { slot: head,    part_type: excavator_head, role: head,    required: true }
+      - { slot: binding, part_type: tough_binding,  role: binding, required: true }
+      - { slot: handle,  part_type: tough_rod,      role: handle,  count: 2, required: true }
+    mining:
+      shape: box
+      width: 3
+      height: 1
+      reach: 1
+      aim: [facing, down]
+      targets: [dirt, grass, sand, gravel, snow, clay]
+    innate_traits:
+      - { name: Area Digging, description: Digs a 3-tile-wide strip of soft ground. }
+
+  fishing_rod:
+    name: Fishing Rod
+    category: tool
+    description: Casts a hooked line that reels in anything it catches.
+    parts:
+      - { slot: rod,  part_type: tool_rod,  role: handle, required: true }
+      - { slot: line, part_type: bowstring, role: cord,   required: true }
+    projectile:
+      path: straight
+      speed: 14
+      pierce: 0
+      ammo: hook
+      max_distance: 12
+      reel: true
+    innate_traits:
+      - { name: Cast, description: Enables fishing. Line material decides reel speed. }
+
+  scissors:
+    name: Scissors
+    category: tool
+    description: A small pair of handheld blades. Precision cutting for fine work - sewing, trimming, and snipping.
+    parts:
+      - { slot: head,   part_type: scissors_blade, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,       role: handle, required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      targets: [cloth, thread, string, vines, leaves, wool]
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: fast
+      hits: single
+      damage_mult: 0.5
+    innate_traits:
+      - { name: Precision Cut, description: Cuts cloth, string, thread and vines in one snip. Poor as a weapon. }
+
+  shears:
+    name: Shears
+    category: tool
+    description: A large two-handed cutting tool. Shears sheep, harvests wool, and trims crops and vines.
+    parts:
+      - { slot: head,   part_type: shears_blade, role: head,   required: true }
+      - { slot: handle, part_type: tool_rod,     role: handle, required: true }
+    mining:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing, up, down]
+      targets: [wool, leaves, flowers, vines, crops, cloth]
+    attack:
+      shape: box
+      width: 1
+      height: 1
+      reach: 1
+      aim: [facing]
+      speed: normal
+      hits: single
+      damage_mult: 0.6
+    innate_traits:
+      - { name: Shearing, description: Harvests wool from sheep and crops from vines without damaging them. }
+
+  # ============================================================= ARMOR
+  helmet:
+    name: Helmet
+    category: armor
+    description: A protective headpiece. The lightest piece of any armor set.
+    parts:
+      - { slot: plate,    part_type: helmet_plate,  role: armor_plate,    required: true }
+      - { slot: lining,   part_type: armor_lining,  role: armor_lining,   required: true }
+      - { slot: fastener, part_type: armor_fastener, role: armor_fastener, required: true }
+    innate_traits:
+      - { name: Head Protection, description: Protects the head from melee and ranged attacks. }
+
+  chestplate:
+    name: Chestplate
+    category: armor
+    description: A protective torso covering. The largest piece of any armor set - more plate, more weight, more defense.
+    parts:
+      - { slot: plate,    part_type: chest_plate,   role: armor_plate,    required: true }
+      - { slot: lining,   part_type: armor_lining,  role: armor_lining,   required: true }
+      - { slot: fastener, part_type: armor_fastener, role: armor_fastener, required: true }
+    innate_traits:
+      - { name: Torso Protection, description: Protects the torso from melee and ranged attacks. }
+
+  leggings:
+    name: Leggings
+    category: armor
+    description: Protective leg coverings. Slightly less armor than a chestplate, but essential for mobility.
+    parts:
+      - { slot: plate,  part_type: leg_plate,    role: armor_plate,  required: true }
+      - { slot: lining, part_type: armor_lining, role: armor_lining, required: true }
+    innate_traits:
+      - { name: Leg Protection, description: Protects the legs from melee and ranged attacks. }
+
+  boots:
+    name: Boots
+    category: armor
+    description: Protective footwear. Protects feet and gives sure footing on unstable ground.
+    parts:
+      - { slot: plate,  part_type: boot_plate,   role: armor_plate,  required: true }
+      - { slot: lining, part_type: armor_lining, role: armor_lining, required: true }
+    innate_traits:
+      - { name: Sure Footing, description: Protects the feet. Prevents slipping on ice and mud. }
+
+  shield:
+    name: Shield
+    category: armor
+    description: A defensive piece held in one hand. Blocks attacks and projectiles at the cost of your off-hand.
+    parts:
+      - { slot: plate,    part_type: shield_plate,   role: armor_plate,    required: true }
+      - { slot: fastener, part_type: armor_fastener, role: armor_fastener, required: true }
+    innate_traits:
+      - { name: Block, description: Blocks half of incoming melee and projectile damage while raised. }

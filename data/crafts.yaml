@@ -1,0 +1,301 @@
+metadata:
+  name: Crafts
+  description: >
+    Every craft in the game. Recipes take inputs and produce an output at a
+    station. Multiple recipes with the same output are crafting alternatives -
+    the player picks the one that fits their resources or tech level.
+  version: 1
+  recipe_types:
+    alloy: Transform one or more materials into another material.
+    assemble: Require a station to build a pattern from its parts. Patterns
+              without an assembly recipe can be crafted by hand.
+
+stations:
+  crafting_table:
+    name: Crafting Table
+    tier: 0
+    type: hand
+    note: Basic assembly bench - no fuel required.
+
+  campfire:
+    name: Campfire
+    tier: 0
+    type: furnace
+    fuels: [wood, coal]
+    note: Primitive smelting. Low yield but needs no tech.
+
+  smeltery:
+    name: Smeltery
+    tier: 1
+    type: furnace
+    fuels: [coal, wood]
+    note: Melts and mixes metals.
+
+  bloomery:
+    name: Bloomery
+    tier: 2
+    type: furnace
+    fuels: [coal]
+    note: Refines iron into steel.
+
+  blast_furnace:
+    name: Blast Furnace
+    tier: 3
+    type: furnace
+    fuels: [coal]
+    note: High-heat alloying. Requires bellows.
+
+recipes:
+
+  # =========================================================== BRONZE
+  # Two recipes - one standard, one primitive. Both produce the same bronze.
+  bronze_standard:
+    type: alloy
+    output: bronze
+    output_qty: 1
+    inputs: { copper: 3, tin: 1 }
+    station: smeltery
+    note: 3:1 copper-tin - the historical standard.
+
+  bronze_primitive:
+    type: alloy
+    output: bronze
+    output_qty: 1
+    inputs: { copper: 4, tin: 1 }
+    station: campfire
+    note: Lower yield, but no smeltery needed.
+
+  # ============================================================ BRASS
+  brass_standard:
+    type: alloy
+    output: brass
+    output_qty: 1
+    inputs: { copper: 2, iron: 1 }
+    station: smeltery
+
+  # ============================================================ STEEL
+  # Two alternatives based on available fuel.
+  steel_coal:
+    type: alloy
+    output: steel
+    output_qty: 1
+    inputs: { iron: 2, coal: 2 }
+    station: bloomery
+    note: Standard - coal fuel.
+
+  steel_charcoal:
+    type: alloy
+    output: steel
+    output_qty: 1
+    inputs: { iron: 2, wood: 2 }
+    station: bloomery
+    note: Charcoal alternative - burns slower but works anywhere trees grow.
+
+  # ======================================================== ALUMINIUM
+  aluminium_standard:
+    type: alloy
+    output: aluminium
+    output_qty: 1
+    inputs: { coal: 3, iron: 2 }
+    station: smeltery
+    note: Carbon reduces iron oxide to metal.
+
+  # ============================================================ INVAR
+  invar_standard:
+    type: alloy
+    output: invar
+    output_qty: 1
+    inputs: { iron: 3, nickel: 2 }
+    station: smeltery
+
+  # ========================================================= ELECTRUM
+  electrum_standard:
+    type: alloy
+    output: electrum
+    output_qty: 1
+    inputs: { magnetite: 2, gold: 1 }
+    station: smeltery
+    note: Gold charged with magnetite - magnetic rather than silvery.
+
+  # ======================================================== ROSE GOLD
+  rose_gold_standard:
+    type: alloy
+    output: rose_gold
+    output_qty: 1
+    inputs: { copper: 3, gold: 1 }
+    station: smeltery
+
+  # ========================================================= TITANIUM
+  titanium_standard:
+    type: alloy
+    output: titanium
+    output_qty: 1
+    inputs: { iron: 2, aluminium: 1 }
+    station: blast_furnace
+    note: >
+      Aluminium is itself an alloy, so titanium's full cost is
+      2 Iron + (3 Coal + 2 Iron) = 4 Iron + 3 Coal.
+  blooderium_standard:
+    type: alloy
+    output: blooderium
+    output_qty: 1
+    inputs: { iron: 3, leather: 2 }
+    station: bloomery
+    note: Iron quenched in animal hide - the leather's blood binds to the metal.
+
+  carbonado_standard:
+    type: alloy
+    output: carbonado
+    output_qty: 1
+    inputs: { diamond: 2, obsidian: 2 }
+    station: blast_furnace
+    note: The apex alloy - diamond and obsidian fused in a blast furnace.
+
+  # ========================================================= ASSEMBLY
+  # Patterns that require a station to build. Patterns without an entry
+  # here can be crafted by hand.
+
+  short_sword_assembly:
+    type: assemble
+    pattern: short_sword
+    station: crafting_table
+
+  long_sword_assembly:
+    type: assemble
+    pattern: long_sword
+    station: crafting_table
+
+  dagger_assembly:
+    type: assemble
+    pattern: dagger
+    station: crafting_table
+
+  kunai_assembly:
+    type: assemble
+    pattern: kunai
+    station: crafting_table
+
+  shuriken_assembly:
+    type: assemble
+    pattern: shuriken
+    station: crafting_table
+
+  needle_assembly:
+    type: assemble
+    pattern: needle
+    station: crafting_table
+
+  javelin_assembly:
+    type: assemble
+    pattern: javelin
+    station: crafting_table
+
+  pike_assembly:
+    type: assemble
+    pattern: pike
+    station: crafting_table
+
+  wrench_assembly:
+    type: assemble
+    pattern: wrench
+    station: crafting_table
+
+  scythe_assembly:
+    type: assemble
+    pattern: scythe
+    station: crafting_table
+
+  claws_assembly:
+    type: assemble
+    pattern: claws
+    station: crafting_table
+
+  rapier_assembly:
+    type: assemble
+    pattern: rapier
+    station: crafting_table
+
+  broadsword_assembly:
+    type: assemble
+    pattern: broadsword
+    station: crafting_table
+
+  katana_assembly:
+    type: assemble
+    pattern: katana
+    station: crafting_table
+
+  spear_assembly:
+    type: assemble
+    pattern: spear
+    station: crafting_table
+
+  halberd_assembly:
+    type: assemble
+    pattern: halberd
+    station: crafting_table
+
+  battleaxe_assembly:
+    type: assemble
+    pattern: battleaxe
+    station: crafting_table
+
+  warhammer_assembly:
+    type: assemble
+    pattern: warhammer
+    station: crafting_table
+
+  mace_assembly:
+    type: assemble
+    pattern: mace
+    station: crafting_table
+
+  bow_assembly:
+    type: assemble
+    pattern: bow
+    station: crafting_table
+
+  crossbow_assembly:
+    type: assemble
+    pattern: crossbow
+    station: crafting_table
+
+  pickaxe_assembly:
+    type: assemble
+    pattern: pickaxe
+    station: crafting_table
+
+  axe_assembly:
+    type: assemble
+    pattern: axe
+    station: crafting_table
+
+  shovel_assembly:
+    type: assemble
+    pattern: shovel
+    station: crafting_table
+
+  hoe_assembly:
+    type: assemble
+    pattern: hoe
+    station: crafting_table
+
+  mattock_assembly:
+    type: assemble
+    pattern: mattock
+    station: crafting_table
+
+  hammer_assembly:
+    type: assemble
+    pattern: hammer
+    station: crafting_table
+
+  excavator_assembly:
+    type: assemble
+    pattern: excavator
+    station: crafting_table
+
+  fishing_rod_assembly:
+    type: assemble
+    pattern: fishing_rod
+    station: crafting_table

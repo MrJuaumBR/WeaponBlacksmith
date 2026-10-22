@@ -1,0 +1,23 @@
+title: "Weapon Blacksmith"
+version: "0.0.1"
+author: "MrJuaumBR"
+tags: ["crafting", "blacksmith", "tinkers", "sandbox", "2d", "rpg"]
+type: "game"
+description: >
+  A Tinkers'-Construct-style crafting game. Forge every weapon, tool and armor
+  piece from individual parts - blade, guard, handle, plate - each one made from
+  a material of your choice. Explore the materials guide, study the patterns,
+  and build something worth swinging.
+main_file: "app.py"
+icon: "data/icon.png"
+banner: null
+color1: "#E67E22"   # forge amber
+color2: "#4A90D9"   # tempered steel blue
+contacts:
+  github: "https://github.com/MrJuaumBR/WeaponBlacksmith"
+args:
+  username: true
+  fullscreen: true
+  debug: true
+save_type: "file"
+save_data_path: "library.json"

@@ -1,0 +1,366 @@
+metadata:
+  name: Materials
+  description: Every material in the game - ores, alloys, naturals and specials.
+  version: 6
+  stat_scale: 0-10 (integers). Higher is always better.
+  stats:
+    resistance: How much punishment a part takes before it breaks (durability).
+    damage: Contribution to the finished weapon's attack power.
+    defense: Contribution to protection (armour plates, guards, shields).
+    speed: How fast the part lets the tool swing or mine.
+  categories:
+    ore: Mined from the world in raw form.
+    alloy: Cannot be found - must be crafted at a station. See crafts.yaml.
+    natural: Grown, harvested or taken from a creature.
+    special: Rare, volcanic, alien or end-game materials.
+  colors:
+    rule: >
+      Tier 1-3 get 1 colour, tier 4-6 get 2, tier 7-9 get 3. First entry is
+      the base tone; the rest are shadow / highlight used for gradients.
+
+materials:
+
+  # ------------------------------------------------------------- naturals
+  stick:
+    name: Stick
+    category: natural
+    tier: 1
+    tags: [wood, cheap, shaft]
+    description: A plain wooden stick. Light and quick, but snaps under stress.
+    colors: ["#8B6A3F"]
+    status: { resistance: 2, damage: 1, defense: 1, speed: 6 }
+    trait: { name: Cheap, description: Costs almost nothing to replace. }
+
+  sapling:
+    name: Sapling
+    category: natural
+    tier: 1
+    tags: [wood, cheap, flexible]
+    description: A young living shoot. Barely a weapon part.
+    colors: ["#4C7A34"]
+    status: { resistance: 1, damage: 1, defense: 1, speed: 4 }
+    trait: { name: Living Wood, description: Repairs 1 durability every 30 seconds. }
+
+  wood:
+    name: Wood (Oak)
+    category: natural
+    tier: 2
+    tags: [wood, shaft]
+    description: The standard tool handle - light, warm, absorbs shock.
+    colors: ["#A9743F"]
+    status: { resistance: 3, damage: 2, defense: 2, speed: 5 }
+    trait: { name: Shock Absorbing, description: Takes 15% less damage from impacts. }
+
+  bamboo:
+    name: Bamboo
+    category: natural
+    tier: 2
+    tags: [wood, hollow, light]
+    description: Hollow, segmented, extremely light.
+    colors: ["#C7B25E"]
+    status: { resistance: 2, damage: 2, defense: 1, speed: 8 }
+    trait: { name: Hollow, description: The finished tool swings faster. }
+
+  leather:
+    name: Leather
+    category: natural
+    tier: 2
+    tags: [leather, hide, grip, padding, organic]
+    description: Cured hide. Best grip and padding material there is.
+    colors: ["#8B5A2B"]
+    status: { resistance: 3, damage: 1, defense: 4, speed: 3 }
+    trait: { name: Sure Grip, description: The tool cannot be disarmed. }
+
+  string:
+    name: String (Sinew)
+    category: natural
+    tier: 2
+    tags: [fiber, binding, bow]
+    description: Twisted animal sinew. The only material that can draw a bow.
+    colors: ["#E8E3D3"]
+    status: { resistance: 2, damage: 1, defense: 2, speed: 6 }
+    trait: { name: Binding, description: Required for any part with the "bowstring" role. }
+
+  bone:
+    name: Bone
+    category: natural
+    tier: 3
+    tags: [bone, calcium, sharp, light]
+    description: Dense, light, surprisingly sharp when splintered.
+    colors: ["#E8E0C8"]
+    status: { resistance: 3, damage: 3, defense: 2, speed: 4 }
+    trait: { name: Splinter, description: +10% damage. No resistance to fire. }
+
+  flint:
+    name: Flint
+    category: natural
+    tier: 3
+    tags: [flint, stone, sharp, brittle]
+    description: Knapped stone with a razor edge. Cheap and dangerous.
+    colors: ["#4A4A50"]
+    status: { resistance: 2, damage: 4, defense: 1, speed: 4 }
+    trait: { name: Keen Edge, description: +20% damage, but durability drains twice as fast. }
+
+  # ----------------------------------------------------------------- ores
+  coal:
+    name: Coal (Carbon)
+    category: ore
+    tier: 1
+    part_usable: false
+    tags: [mineral, fuel, brittle]
+    description: Nearly pure carbon. Cheap and hard but shatters on impact.
+    colors: ["#1C1C1C"]
+    status: { resistance: 1, damage: 1, defense: 1, speed: 2 }
+    trait: { name: Brittle, description: Loses durability 50% faster, but costs almost nothing. }
+
+  copper:
+    name: Copper
+    category: ore
+    tier: 2
+    tags: [metal, malleable]
+    description: A reddish-brown metal that is highly conductive and malleable. It is commonly used in electrical wiring, plumbing, and the production of alloys.
+    colors: ["#B87333"]
+    status: { resistance: 3, damage: 3, defense: 2, speed: 5 }
+    trait: { name: Malleable, description: Takes 25% less damage from any single big hit. }
+
+  tin:
+    name: Tin
+    category: ore
+    tier: 2
+    tags: [metal, soft]
+    description: A soft silvery metal. Useless alone - exists to become bronze.
+    colors: ["#C8C8C8"]
+    status: { resistance: 3, damage: 2, defense: 3, speed: 4 }
+    trait: { name: Soft, description: Deforms rather than breaks, but wears quickly. }
+
+  iron:
+    name: Iron
+    category: ore
+    tier: 3
+    tags: [metal]
+    description: The workhorse metal. No weaknesses, no specialities.
+    colors: ["#A8A8B0"]
+    status: { resistance: 4, damage: 4, defense: 4, speed: 4 }
+    trait: { name: Reliable, description: No bonuses and no penalties. }
+
+  lead:
+    name: Lead
+    category: ore
+    tier: 3
+    tags: [metal, heavy, dense]
+    description: Very dense and very soft. Swings like a hammer, hits like one too.
+    colors: ["#5C5F66"]
+    status: { resistance: 3, damage: 5, defense: 5, speed: 2 }
+    trait: { name: Heavy, description: +30% damage, -20% swing speed. }
+
+  magnetite:
+    name: Magnetite
+    category: ore
+    tier: 3
+    tags: [metal, magnetic]
+    description: Dark iron ore with a permanent magnetic field. Pulls raw iron toward it.
+    colors: ["#3A3340"]
+    status: { resistance: 4, damage: 3, defense: 4, speed: 3 }
+    trait:
+      name: Magnetic
+      description: >
+        Attracts dropped metal items from 2 tiles away and deflects metal
+        projectiles that pass through your attack box.
+
+  nickel:
+    name: Nickel
+    category: ore
+    tier: 4
+    tags: [metal, corrosion-resistant]
+    description: Tough, slightly green silver. Resists corrosion better than most.
+    colors: ["#A8B0A0", "#7E8878"]
+    status: { resistance: 5, damage: 4, defense: 5, speed: 4 }
+    trait: { name: Corrosion Proof, description: Immune to rust, acid and water damage. }
+
+  silver:
+    name: Silver
+    category: ore
+    tier: 4
+    tags: [metal, precious, holy]
+    description: Soft, bright, fast. Cuts through things that shouldn't be cuttable.
+    colors: ["#D8D8E0", "#9A9AA8"]
+    status: { resistance: 4, damage: 4, defense: 3, speed: 6 }
+    trait: { name: Hallowed, description: Deals double damage to undead and demonic targets. }
+
+  gold:
+    name: Gold
+    category: ore
+    tier: 6
+    tags: [metal, precious, soft]
+    description: Dense, soft, beautiful. A damage material, not a blade material.
+    colors: ["#FFD24A", "#B8860B"]
+    status: { resistance: 4, damage: 7, defense: 3, speed: 7 }
+    trait: { name: Gilded, description: +15% damage, but wears out twice as fast. }
+
+  diamond:
+    name: Diamond
+    category: ore
+    tier: 7
+    tags: [gem, crystalline]
+    description: Pure crystallised carbon. Holds an edge forever.
+    colors: ["#9BE8E8", "#5CC8D8", "#E8FBFF"]
+    status: { resistance: 8, damage: 7, defense: 7, speed: 6 }
+    trait: { name: Razor Edge, description: Ignores 25% of the target's armour. }
+
+  platinum:
+    name: Platinum
+    category: ore
+    tier: 7
+    tags: [metal, precious, dense]
+    description: Heavier than gold, harder than silver, rarer than both.
+    colors: ["#E5E8EC", "#B8C0C8", "#8A929C"]
+    status: { resistance: 7, damage: 8, defense: 6, speed: 6 }
+    trait: { name: Unyielding, description: Cannot be knocked out of the hand; parts never warp. }
+
+  # --------------------------------------------------------------- alloys
+  bronze:
+    name: Bronze
+    category: alloy
+    tier: 3
+    alloy: true
+    tags: [metal, alloy, ancient]
+    description: Copper hardened with tin. The first alloy ever made.
+    colors: ["#CD7F32"]
+    status: { resistance: 5, damage: 4, defense: 4, speed: 5 }
+    trait: { name: Ancient Alloy, description: Cheaper to repair than any other metal at its tier. }
+
+  brass:
+    name: Brass
+    category: alloy
+    tier: 4
+    alloy: true
+    tags: [metal, alloy]
+    description: Copper and iron, bright yellow-gold, does not rust.
+    colors: ["#D4AF37", "#A8871F"]
+    status: { resistance: 5, damage: 5, defense: 4, speed: 6 }
+    trait: { name: Low Friction, description: Wears 20% slower and never corrodes. }
+
+  steel:
+    name: Steel
+    category: alloy
+    tier: 5
+    alloy: true
+    tags: [metal, alloy, tempered]
+    description: Iron reforged with carbon. The first reliable weapon metal.
+    colors: ["#7E8A97", "#C0C8D0"]
+    status: { resistance: 6, damage: 6, defense: 5, speed: 5 }
+    trait: { name: Tempered, description: +1 damage for every 10 durability the part still has. }
+
+  aluminium:
+    name: Aluminium
+    category: alloy
+    tier: 5
+    alloy: true
+    tags: [metal, alloy, light]
+    description: Pale, feather-light. Nothing swings faster.
+    colors: ["#D6DDE3", "#A7B0B8"]
+    status: { resistance: 5, damage: 5, defense: 3, speed: 8 }
+    trait: { name: Lightweight, description: The tool swings 20% faster. }
+
+  invar:
+    name: Invar
+    category: alloy
+    tier: 5
+    alloy: true
+    tags: [metal, alloy, stable]
+    description: Iron and nickel. Barely expands when heated.
+    colors: ["#6E7A85", "#4A5560"]
+    status: { resistance: 6, damage: 5, defense: 6, speed: 4 }
+    trait: { name: Dimensionally Stable, description: Never loses durability to heat, cold or impact. }
+
+  blooderium:
+    name: Blooderium
+    category: alloy
+    tier: 5
+    alloy: true
+    tags: [metal, alloy, organic, blood]
+    description: Dark red iron fused with animal hide. The metal drinks blood to mend itself - weaker than steel, but never stays broken.
+    colors: ["#A03038", "#5A1A1A"]
+    status: { resistance: 5, damage: 4, defense: 3, speed: 5 }
+    trait:
+      name: Bloodthirst
+      description: >
+        Every hit drains 1 HP from the wielder to restore 3 durability.
+        Cannot drain below 1 HP - fight carefully.
+
+  electrum:
+    name: Electrum
+    category: alloy
+    tier: 6
+    alloy: true
+    tags: [metal, alloy, precious, magnetic]
+    description: Gold charged with magnetite. Pale yellow but humming with magnetic energy.
+    colors: ["#F5E27A", "#D4AF37"]
+    status: { resistance: 5, damage: 7, defense: 3, speed: 8 }
+    trait:
+      name: Electromagnetic
+      description: >
+        Every hit chains a small shock to nearby enemies; nearby metal items
+        drift toward the wielder.
+
+  rose_gold:
+    name: Rose Gold
+    category: alloy
+    tier: 6
+    alloy: true
+    tags: [metal, alloy, precious]
+    description: Copper and gold, true rose-pink. Softer than gold, tougher too.
+    colors: ["#E8B4B8", "#B76E79"]
+    status: { resistance: 5, damage: 7, defense: 4, speed: 7 }
+    trait: { name: Warm Glow, description: +15% damage; repairs slowly in sunlight. }
+
+  titanium:
+    name: Titanium
+    category: alloy
+    tier: 8
+    alloy: true
+    tags: [metal, alloy, aerospace]
+    description: Iron melted into aluminium. As light as one, stronger than steel.
+    colors: ["#8C9BA8", "#C4CFD6", "#5F6E7A"]
+    status: { resistance: 8, damage: 8, defense: 8, speed: 6 }
+    trait: { name: Aerospace, description: Immune to fire and heat. Parts never warp. }
+
+  # -------------------------------------------------------------- special
+  vibranium:
+    name: Vibranium
+    category: special
+    tier: 8
+    tags: [metal, alien, vibranium]
+    description: Iridescent purple metal from beyond this world. Absorbs kinetic energy and laughs at blows that would shatter steel.
+    colors: ["#3A5BC8", "#7B3FA8", "#B82A4A"]
+    status: { resistance: 9, damage: 7, defense: 9, speed: 5 }
+    trait:
+      name: Kinetic Absorption
+      description: >
+        Absorbs 15% of every hit taken, converting it into a small shock
+        against the attacker. Vibranium parts almost never dent.
+
+  obsidian:
+    name: Obsidian (Obsidiana)
+    category: special
+    tier: 9
+    tags: [volcanic, glass, endgame, stone]
+    description: Volcanic glass, sharper than surgical steel.
+    colors: ["#1A1226", "#3B2A52", "#6C4FA0"]
+    status: { resistance: 9, damage: 9, defense: 8, speed: 5 }
+    trait: { name: Volcanic Glass, description: Cuts through armour; slowly repairs in lava. }
+
+  carbonado:
+    name: Carbonado
+    category: alloy
+    tier: 9
+    alloy: true
+    tags: [gem, stone, alloy, apex, carbon]
+    description: Diamond fused with obsidian. The blackest, sharpest, most perfect cutting edge ever forged - the apex of blacksmithing.
+    colors: ["#0A0A12", "#2A2A3E", "#C8E8F8"]
+    status: { resistance: 10, damage: 10, defense: 8, speed: 6 }
+    trait:
+      name: Apex Edge
+      description: >
+        Ignores 50% of target armour. Cuts through everything - the only
+        material with a perfect 10 in both durability and damage.
