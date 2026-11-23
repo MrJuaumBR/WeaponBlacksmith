@@ -203,3 +203,32 @@ Patterns without an `assemble` recipe in `crafts.yaml` are craftable by hand. Pa
 3. If it needs a station to assemble, add an `assemble` recipe in `crafts.yaml`.
 
 The validator in `yaml_handler.py` runs on startup and will warn about unknown part types, tags no material provides, missing required slots, and cycles in alloy recipes.
+
+
+## Idle-RPG adventure
+
+The original Materials and Patterns guides remain available from the title screen and from Hearthglade. Choose **Start Adventure** to create or select one of up to three characters. Each character has independent skill progression, inventory, city access, guild membership, NPC conversations, and an idle task.
+
+- Train nine skills, including Blacksmithing, Mining, Woodcutting, Archery, and Swordmastery.
+- Assign a repeating activity, then claim completed cycles and offline rewards (offline credit is capped at eight hours).
+- Gather materials that use the existing YAML catalog IDs, forge starter weapons, and explore five skill-gated cities.
+- Join one guild, progress its contract, and gain reputation/ranks.
+- Talk with five locally authored NPCs. Their response lines are selected from data-driven banks and rotate; there is no Ollama or LLM dependency.
+- The game uses an app-local forge-amber and tempered-steel theme with complete dark and light variants.
+
+Progress is stored locally at `~/.weapon_blacksmith/save.json`; set `WEAPON_BLACKSMITH_SAVE` to use a different path. Start the app from the project root with `python app.py`. Run the display-independent game tests with `python -m unittest data.rpg.tests.test_game`. A graphical runtime with LunaEngine's Pygame/OpenGL dependencies is required to open the window.
+
+## Adventure hub and new systems
+
+Hearthglade now uses a clearer hub menu with dedicated screens for the player's
+**Inventory**, **Crafting Hall**, **Battle**, **Mods**, skills, cities, guilds,
+and NPC dialogue. Inventory supports a scrollable list, live text search, and
+sorting by name, quantity, or category. The Crafting Hall groups the Forge,
+Crafting Table, Smeltery, Blast Furnace, and expansion stations in one place.
+
+The first battle loop is deterministic and data-friendly: encounters have HP,
+retaliation, rewards, and Combat XP, and the Matter mod adds corrupted
+encounters in Broken Reality. See [`modding.md`](modding.md) for the JSON/YAML
+extension format. The game creates `data/mods/mods.json` on startup and ships
+with `mod-pt-br-translation-v0.1.json` and `mod-matter-v0.1.yaml` disabled by
+default; enable them from the Mods screen and restart to reload catalogs.
