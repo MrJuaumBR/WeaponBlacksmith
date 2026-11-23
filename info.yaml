@@ -28,7 +28,6 @@ args:
   debug: true
 save_type: null
 save_data_path: ""
-source: "https://github.com/MrJuaumBR/WeaponBlacksmith"
 system_requirements:
   storage: null
   os: [W, L]
