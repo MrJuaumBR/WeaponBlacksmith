@@ -1,10 +1,14 @@
 import sys
 import pygame
 
+from functools import lru_cache
+
 from lunaengine.core import Scene, LunaEngine
 from lunaengine.ui import *
+from lunaengine.graphics import SpriteSheet
 
-from data.config import APP_YAML_HANDLER
+from data.config import APP_ATLAS, APP_YAML_HANDLER
+from data.rpg.mods import translate
 
 
 # ---------------------------------------------------------------------------
@@ -41,7 +45,7 @@ _MATERIAL_CATEGORY_COLORS = {
 _PATTERN_CATEGORY_COLORS = {
     "weapon":   (230, 120, 110),
     "ranged":   (120, 170, 230),
-    "throwing": (100, 220, 200),   # NEW - teal
+    "throwing": (100, 220, 200),
     "armor":    (230, 200, 100),
     "tool":     (120, 200, 140),
 }
@@ -54,14 +58,23 @@ _ROLE_COLORS = {
     "handle":  (140, 190, 140),
     "tip":     (200, 150, 220),
     "coating": (160, 160, 200),
+    "armor_plate":    (220, 180, 100),
+    "armor_lining":   (160, 200, 160),
+    "armor_fastener": (180, 180, 190),
 }
 
 
 # ---------------------------------------------------------------------------
-# Surface generators
+# Gradient surface (also used as the tint source for sprites)
 # ---------------------------------------------------------------------------
 
-def _gradient_surface(width, height, colors):
+def _gradient_surface(width, height, colors, border=True):
+    """Vertical gradient through a list of RGB tuples.
+
+    With a single colour this is a flat fill; with two or three it blends
+    between them. The optional 1px border is useful for card swatches, but
+    is switched off when the gradient is used as a tint mask on a sprite.
+    """
     width, height = max(1, int(width)), max(1, int(height))
     surf = pygame.Surface((width, height), pygame.SRCALPHA)
 
@@ -81,9 +94,143 @@ def _gradient_surface(width, height, colors):
             b = int(c1[2] * (1 - lt) + c2[2] * lt)
             pygame.draw.line(surf, (r, g, b, 255), (0, y), (width, y))
 
-    pygame.draw.rect(surf, (200, 200, 220, 255), (0, 0, width, height), 1)
+    if border:
+        pygame.draw.rect(surf, (200, 200, 220, 255), (0, 0, width, height), 1)
     return surf
 
+
+# ---------------------------------------------------------------------------
+# Sprite sheet access - shared for ingot and gem ball
+# ---------------------------------------------------------------------------
+# The textures.png sheet is laid out in 64x64 cells.
+#
+#   Ingot (metals, ores, woods, leathers, etc.)
+#     cell (0, 0), sprite occupying (0, 17) .. (63, 45)  -> 64 x 29
+#
+#   Ball (gems - diamond, carbonado, and any future gem)
+#     sprite occupying the second 64x64 cell (64, 0) .. (127, 63)
+#
+# Sprite dimensions below are the exact sizes, not the cell size.
+
+_INGOT_RECT = pygame.Rect(0, 17, 64, 29)
+_BALL_RECT  = pygame.Rect(64, 0, 64, 64)
+
+_sprite_cache: dict = {}
+
+
+def _get_sprite(key, rect):
+    """Extract a white sprite from the shared textures sheet, once."""
+    if key in _sprite_cache:
+        return _sprite_cache[key]
+
+    try:
+        sheet = SpriteSheet.from_atlas("textures", APP_ATLAS)
+        sprite = sheet.get_sprite_at_rect(rect).copy()
+        _sprite_cache[key] = sprite
+    except Exception as exc:
+        _sprite_cache[key] = None
+        print(f"[materials] sprite '{key}' unavailable, falling back: {exc}")
+
+    return _sprite_cache[key]
+
+
+def _get_ingot_sprite():
+    return _get_sprite("ingot", _INGOT_RECT)
+
+
+def _get_ball_sprite():
+    return _get_sprite("ball", _BALL_RECT)
+
+
+def _sprite_for_material(mat):
+    """Pick the right icon: ball for gems, ingot for everything else."""
+    tags = mat.get("tags", [])
+    if "gem" in tags:
+        return _get_ball_sprite()
+    return _get_ingot_sprite()
+
+
+# ---------------------------------------------------------------------------
+# Tinting
+# ---------------------------------------------------------------------------
+
+def _tinted(sprite, colors, size):
+    """Return `sprite` tinted with a palette and scaled to `size`.
+
+    One colour: SpriteSheet.tint(..., blend_mode="multiply").
+    Two or three colours: multiply a vertical palette gradient onto the white
+    sprite. BLEND_RGB_MULT only touches RGB, so the sprite's alpha - including
+    anti-aliased edges - is preserved.
+    """
+    if sprite is None:
+        return None
+
+    if size != sprite.get_size():
+        sprite = pygame.transform.scale(sprite, size)
+
+    if len(colors) == 1:
+        return SpriteSheet.tint(sprite, colors[0], intensity=1.0, blend_mode="multiply")
+
+    gradient = _gradient_surface(
+        sprite.get_width(), sprite.get_height(), colors, border=False
+    )
+    tinted = sprite.copy()
+    tinted.blit(gradient, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+    return tinted
+
+
+# ---------------------------------------------------------------------------
+# Panel builders (card image area)
+# ---------------------------------------------------------------------------
+
+def _sprite_panel(img_w, img_h, sprite, colors):
+    """Compose the card image area: top-lit slot, tinted sprite centred, border.
+
+    Falls back to a gradient bar if `sprite` is None.
+    """
+    panel = pygame.Surface((img_w, img_h), pygame.SRCALPHA)
+
+    for y in range(img_h):
+        t = y / max(1, img_h - 1)
+        shade = int(34 - 10 * t)
+        pygame.draw.line(panel, (shade, shade, shade + 8, 255), (0, y), (img_w, y))
+
+    pygame.draw.rect(panel, (58, 58, 74, 255), (0, 0, img_w, img_h), 1, border_radius=4)
+
+    if sprite is not None:
+        base_w, base_h = sprite.get_size()
+        # Integer scaling so pixel art stays crisp, whatever the sprite size.
+        max_scale_w = max(1, int(img_w * 0.75) // base_w)
+        max_scale_h = max(1, int(img_h * 0.75) // base_h)
+        scale = max(1, min(max_scale_w, max_scale_h))
+
+        target_w = base_w * scale
+        target_h = base_h * scale
+
+        tinted = _tinted(sprite, colors, (target_w, target_h))
+        if tinted is not None:
+            panel.blit(tinted, ((img_w - target_w) // 2, (img_h - target_h) // 2))
+            return panel
+
+    # Fallback: gradient bar.
+    grad = _gradient_surface(img_w - 16, max(8, img_h // 2), colors)
+    panel.blit(grad, (8, (img_h - grad.get_height()) // 2))
+    return panel
+
+
+@lru_cache(maxsize=128)
+def _ingot_panel(img_w, img_h, colors):
+    return _sprite_panel(img_w, img_h, _get_ingot_sprite(), colors)
+
+
+@lru_cache(maxsize=128)
+def _ball_panel(img_w, img_h, colors):
+    return _sprite_panel(img_w, img_h, _get_ball_sprite(), colors)
+
+
+# ---------------------------------------------------------------------------
+# Pattern slot diagram
+# ---------------------------------------------------------------------------
 
 def _pattern_diagram_surface(width, height, pattern):
     width, height = max(1, int(width)), max(1, int(height))
@@ -130,6 +277,7 @@ class _GridGuideScene(Scene):
 
     def __init__(self, engine, items):
         super().__init__(engine)
+        self.return_scene = "main_menu"
         self.items = items
         self._build()
 
@@ -138,7 +286,7 @@ class _GridGuideScene(Scene):
 
         self.add_ui_element(TextLabel(
             self.WIDTH // 2, int(18 * sy),
-            self.TITLE, int(32 * sm),
+            translate(self.TITLE), int(32 * sm),
             pivot=(0.5, 0),
         ))
 
@@ -148,18 +296,11 @@ class _GridGuideScene(Scene):
         gap_x = int(self.GAP * sx)
         gap_y = int(self.GAP * sy)
 
-        # -- pick a card width that provably fits inside the window --------
-        # WIDTH is treated as actual screen width (matches Button usage in
-        # the rest of the project). Cap card width so the full grid fits with
-        # a 30px margin on each side, regardless of how WIDTH is measured.
         max_grid_w = int(self.WIDTH - 60)
         max_card_w = (max_grid_w - (cols - 1) * gap_x) // cols
 
         card_w = int(self.DESIRED_CARD_W * sx)
         card_w = min(card_w, max_card_w)
-
-        # If the screen is unusually narrow and cards get too small, fall back
-        # to the design-sized card and let the frame scroll horizontally.
         if card_w < int(150 * sx):
             card_w = int(150 * sx)
 
@@ -204,8 +345,14 @@ class _GridGuideScene(Scene):
             "Back", int(18 * sm),
             pivot=(0, 1),
         )
-        back.set_on_click(lambda: self.engine.set_scene("main_menu"))
+        back.set_on_click(self._go_back)
         self.add_ui_element(back)
+
+    def on_enter(self, previous_scene=None, *args, **kwargs):
+        self.return_scene = "rpg_town" if previous_scene == "rpg_town" else "main_menu"
+
+    def _go_back(self):
+        self.engine.set_scene(self.return_scene)
 
     def _build_card(self, item, x, y):
         raise NotImplementedError
@@ -215,7 +362,7 @@ class _GridGuideScene(Scene):
 
 
 # ---------------------------------------------------------------------------
-# Materials grid
+# Materials grid (ingot for most, ball for gems)
 # ---------------------------------------------------------------------------
 
 class MaterialsScene(_GridGuideScene):
@@ -248,14 +395,18 @@ class MaterialsScene(_GridGuideScene):
         img_w = self.card_w - 2 * pad
         img_h = int(self.card_h * 0.30)
 
-        colors = [_hex_to_rgb(c) for c in mat.get("colors", ["#808080"])]
-        surf = _gradient_surface(img_w, img_h, colors)
+        colors = tuple(_hex_to_rgb(c) for c in mat.get("colors", ["#808080"]))
+
+        # Gems (diamond, carbonado, any future 'gem'-tagged material) show as
+        # a tinted ball; everything else shows as a tinted ingot.
+        sprite = _sprite_for_material(mat)
+        panel = _sprite_panel(img_w, img_h, sprite, colors)
+
         card.add_child(ImageLabel(
-            pad, pad, surf,
+            pad, pad, panel,
             width=int(img_w), height=int(img_h),
         ))
 
-        # Title - large, as requested
         title_y = pad + img_h + int(6 * sm)
         card.add_child(TextLabel(
             pad, title_y,
@@ -264,7 +415,6 @@ class MaterialsScene(_GridGuideScene):
             color=(240, 240, 250), pivot=(0, 0),
         ))
 
-        # Meta line - category · tier
         meta_y = title_y + int(32 * sm)
         category = mat.get("category", "")
         meta = f"{category.title()} · Tier {mat.get('tier', '?')}"
@@ -275,7 +425,6 @@ class MaterialsScene(_GridGuideScene):
             pivot=(0, 0),
         ))
 
-        # Stats - 2x2 grid
         status = mat.get("status", {})
         stat_y = meta_y + int(26 * sm)
         stats = [
@@ -297,7 +446,6 @@ class MaterialsScene(_GridGuideScene):
                 color=_stat_color(value), pivot=(0, 0),
             ))
 
-        # Description - LongTextLabel, wrapped
         desc_y = stat_y + 2 * row_h + int(10 * sm)
         desc = mat.get("description", "")
         if desc:
@@ -316,7 +464,7 @@ class MaterialsScene(_GridGuideScene):
 
 
 # ---------------------------------------------------------------------------
-# Patterns grid
+# Patterns grid (slot diagram)
 # ---------------------------------------------------------------------------
 
 class PatternsScene(_GridGuideScene):
@@ -376,7 +524,6 @@ class PatternsScene(_GridGuideScene):
             pivot=(0, 0),
         ))
 
-        # Mechanics lines
         line_y = meta_y + int(26 * sm)
         for i, line in enumerate(self._mechanics_lines(pat)[:3]):
             card.add_child(TextLabel(
@@ -385,7 +532,6 @@ class PatternsScene(_GridGuideScene):
                 color=(200, 200, 215), pivot=(0, 0),
             ))
 
-        # Description underneath
         desc_y = line_y + 3 * int(18 * sm) + int(8 * sm)
         desc = pat.get("description", "")
         if desc:
@@ -437,33 +583,41 @@ class MainMenu(Scene):
     def setup_ui(self):
         self.add_ui_element(TextLabel(
             self.WIDTH // 2, 140 * self.ratio.y,
-            "Weapon Blacksmith", 72 * self.ratio.med,
+            translate("Weapon Blacksmith"), 72 * self.ratio.med,
             pivot=(0.5, 0.0),
         ))
 
-        materials_btn = Button(
+        adventure_btn = Button(
             self.WIDTH // 2, 280 * self.ratio.y,
             320 * self.ratio.x, 46 * self.ratio.y,
-            "Materials Guide", 28 * self.ratio.med,
+            translate("Start Adventure"), 28 * self.ratio.med,
+            pivot=(0.5, 0),
+        )
+        materials_btn = Button(
+            self.WIDTH // 2, 336 * self.ratio.y,
+            320 * self.ratio.x, 46 * self.ratio.y,
+            translate("Materials Guide"), 28 * self.ratio.med,
             pivot=(0.5, 0),
         )
         patterns_btn = Button(
-            self.WIDTH // 2, 336 * self.ratio.y,
+            self.WIDTH // 2, 392 * self.ratio.y,
             320 * self.ratio.x, 46 * self.ratio.y,
-            "Patterns Guide", 28 * self.ratio.med,
+            translate("Patterns Guide"), 28 * self.ratio.med,
             pivot=(0.5, 0),
         )
         exit_btn = Button(
-            self.WIDTH // 2, 392 * self.ratio.y,
+            self.WIDTH // 2, 448 * self.ratio.y,
             320 * self.ratio.x, 46 * self.ratio.y,
-            "Exit", 28 * self.ratio.med,
+            translate("Exit"), 28 * self.ratio.med,
             pivot=(0.5, 0),
         )
 
+        adventure_btn.set_on_click(lambda: self.engine.set_scene("rpg_characters"))
         materials_btn.set_on_click(lambda: self.engine.set_scene("materials"))
         patterns_btn.set_on_click(lambda: self.engine.set_scene("patterns"))
         exit_btn.set_on_click(self._exit)
 
+        self.add_ui_element(adventure_btn)
         self.add_ui_element(materials_btn)
         self.add_ui_element(patterns_btn)
         self.add_ui_element(exit_btn)

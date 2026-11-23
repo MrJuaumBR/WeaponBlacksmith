@@ -21,13 +21,14 @@ banner: null
 color1: "#E67E22"
 color2: "#4A90D9"
 contacts:
-  github: "https://github.com/MrJuaumBR/WeaponBlacksmith"
+  github: "https://github.com/MrJuaumBR/LunaEngine-Games"
 args:
   username: true
   fullscreen: true
   debug: true
 save_type: null
 save_data_path: ""
+source: "https://github.com/MrJuaumBR/LunaEngine-Games"
 system_requirements:
   storage: null
   os: [W, L]

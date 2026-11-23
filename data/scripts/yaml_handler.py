@@ -2,6 +2,13 @@ import yaml
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+try:
+    from data.rpg.mods import enabled_content
+except ModuleNotFoundError:  # Support ``python data/scripts/yaml_handler.py``.
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from data.rpg.mods import enabled_content
+
 
 class YAMLHandlerError(Exception):
     """Raised when a YAML file is malformed or internally inconsistent."""
@@ -40,6 +47,13 @@ class YAMLHandler:
         self.crafts_meta = crf_raw.get("metadata", {})
         self.stations: Dict[str, dict] = crf_raw.get("stations", {})
         self.recipes: Dict[str, dict] = crf_raw.get("recipes", {})
+
+        # Optional mods extend the same validated catalogs as the built-in
+        # guides.  ``crafting_recipes`` keeps RPG recipes separate from the
+        # lower-level alloy/assembly schema used by this handler.
+        self.materials.update(enabled_content("materials"))
+        self.stations.update(enabled_content("stations"))
+        self.recipes.update(enabled_content("crafting_recipes"))
 
         self._validate()
 

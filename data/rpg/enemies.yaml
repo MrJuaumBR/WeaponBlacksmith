@@ -1,0 +1,52 @@
+metadata:
+  version: 1
+  description: Data-driven RPG enemy catalog. Values are tuned for the first combat pass.
+enemies:
+  goblin:
+    name: Goblin
+    hp: 18
+    damage: 3
+    reward: 10
+    color: '#8FB36A'
+  skeleton:
+    name: Skeleton
+    hp: 24
+    damage: 5
+    reward: 14
+    color: '#D7D4C2'
+  orc:
+    name: Orc
+    hp: 38
+    damage: 8
+    reward: 25
+    color: '#6B9B63'
+  ogre:
+    name: Ogre
+    hp: 70
+    damage: 12
+    reward: 48
+    color: '#8D7665'
+  slime:
+    name: Slime
+    hp: 14
+    damage: 2
+    reward: 8
+    color: '#6AD1B4'
+  kobold:
+    name: Kobold
+    hp: 28
+    damage: 6
+    reward: 18
+    color: '#B27C55'
+  corrupted_citizen:
+    name: Corrupted Citizen
+    hp: 26
+    damage: 4
+    reward: 18
+    color: '#9C4DFF'
+  reality_shard:
+    name: Reality Shard
+    hp: 42
+    damage: 7
+    reward: 35
+    color: '#56D6C8'

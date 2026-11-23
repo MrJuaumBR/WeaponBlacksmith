@@ -1,0 +1,114 @@
+id: matter
+name: Matter & Anti-Matter
+version: '0.1'
+enabled_by_default: false
+description: Adds Broken Reality, corrupted NPCs, Matterite and Anti-matterite ores, stations, recipes, and battle encounters.
+capabilities:
+  - cities
+  - npcs
+  - materials
+  - craftings
+  - battle
+content:
+  materials:
+    matterite_ore:
+      name: Matterite Ore
+      tier: 7
+      category: ore
+      status: {resistance: 8, damage: 8, defense: 7, speed: 6}
+      trait: Reality Anchor
+      colors: ['#56D6C8', '#218D9A', '#B8FFF4']
+      tags: [metal, ore]
+    antimatterite_ore:
+      name: Anti-matterite Ore
+      tier: 9
+      category: special
+      status: {resistance: 7, damage: 10, defense: 6, speed: 9}
+      trait: Annihilation
+      colors: ['#26143D', '#9C4DFF', '#F4C6FF']
+      tags: [metal, ore, gem]
+  stations:
+    antimatter_chamber:
+      name: Anti-Matter Chamber
+      tier: 4
+      type: anomaly
+      fuels: [coal, antimatterite_ore]
+  crafting_recipes:
+    matterite_alloy:
+      type: alloy
+      output: matterite_ore
+      output_qty: 1
+      station: antimatter_chamber
+      inputs: {iron: 2, diamond: 1}
+    antimatterite_refinement:
+      type: alloy
+      output: antimatterite_ore
+      output_qty: 1
+      station: antimatter_chamber
+      inputs: {matterite_ore: 2, carbonado: 1}
+  cities:
+    broken_reality:
+      name: Broken Reality
+      description: A fractured city where reality leaks through the streets and every citizen is corrupted.
+      unlock_skill: combat
+      unlock_level: 2
+      npcs: [Null-7, Veyra]
+  activities:
+    mine_matterite:
+      name: Mine Matterite ore
+      skill: mining
+      city: broken_reality
+      seconds_per_cycle: 55
+      xp: 26
+      drops: {matterite_ore: 1}
+      gold: 7
+      description: Mine stable matter from a collapsed reality seam.
+    mine_antimatterite:
+      name: Mine Anti-matterite ore
+      skill: mining
+      city: broken_reality
+      seconds_per_cycle: 70
+      xp: 34
+      drops: {antimatterite_ore: 1}
+      gold: 12
+      description: Harvest the dangerous dark ore before it annihilates itself.
+  recipes:
+    matterite_blade:
+      name: Matterite Blade
+      materials: {matterite_ore: 3, iron: 1, wood: 1}
+      skill: blacksmithing
+      level: 2
+      city: broken_reality
+      station: forge
+      xp: 70
+      description: A stable blade that pins local reality in place.
+      weapon_damage: [10, 15]
+    antimatter_edge:
+      name: Anti-matter Edge
+      materials: {antimatterite_ore: 2, matterite_ore: 2, coal: 2}
+      skill: blacksmithing
+      level: 3
+      city: broken_reality
+      station: antimatter_chamber
+      xp: 110
+      description: A forbidden edge that tears holes in the air around it.
+      weapon_damage: [15, 24]
+  npcs:
+    Null-7:
+      occupation: Corrupted reality miner
+      personality: Flickering and impossible to read
+      responses:
+        first_meet: ["Null-7 stares through {player}. 'Your timeline is still intact.'"]
+        greeting: ["'The ore remembers every version of you.'"]
+        work: ["'Matterite is safe. Anti-matterite is a promise.'"]
+        crafting: ["'Use the Anti-Matter Chamber if you want the edge to survive.'"]
+        farewell: ["'Do not trust the walls of Broken Reality.'"]
+    Veyra:
+      occupation: Corrupted station keeper
+      personality: Calm in the middle of impossible storms
+      responses:
+        first_meet: ["Veyra's shadow moves first. 'Welcome to the broken side.'"]
+        greeting: ["'Reality is a resource here.'"]
+        work: ["'The chamber is ready when you are.'"]
+        crafting: ["'Matter and anti-matter require equal respect.'"]
+        farewell: ["'Come back before the city changes again.'"]
